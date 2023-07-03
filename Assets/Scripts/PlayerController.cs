@@ -17,14 +17,15 @@ public class PlayerController : MonoBehaviour
     //[SerializeField] private float laneSwitchSmoothing = 3f;
     private float gravity;
     private Vector3 direction;
-    
+
+
     private Transform playerInitialPosition;
     private int currentSpeedDistanceIndex=0; // Speed index for Distance List
     private int currentSpeedCoinAmountIndex = 0; // Speed index for Coin Amount List
     private int currentSpeedMultiplierIndex = 0; // Speed index for Multiplier List
     private CoinCollect coinCollect;
     private float smoothTransition;
-   
+  
     private float newPos;
     private enum CurrentLane
     {
@@ -41,10 +42,14 @@ public class PlayerController : MonoBehaviour
     {
         playerInitialPosition = transform;
         PlayerPrefs.SetFloat("PlayerInitialXPosition", playerInitialPosition.position.x);
+        PlayerPrefs.SetFloat("PlayerInitialYPosition", playerInitialPosition.position.y);
         coinCollect = GetComponent<CoinCollect>();
         currentLane = CurrentLane.Mid;
+       // smoothTransition = playerInitialPosition.position.x; // Initialize smoothTransition
+        newPos = playerInitialPosition.position.x;
     }
-   
+
+
     void Update()
     {
 
@@ -62,13 +67,14 @@ public class PlayerController : MonoBehaviour
     }
     private void PlayerMovement()
     {
-        direction.z = moveForward;
+         direction.z = moveForward;
+      
         smoothTransition = Mathf.Lerp(smoothTransition, newPos, Time.fixedDeltaTime * smoothTransitionValue);
         characterController.Move(new Vector3(smoothTransition-transform.position.x,direction.y * Time.fixedDeltaTime,direction.z * Time.fixedDeltaTime) );
+        //characterController.Move(new Vector3(playerInitialPosition.position.x, direction.y * Time.fixedDeltaTime, direction.z * Time.fixedDeltaTime));
     }
     private void GetUserInput()
     {
-
         if (characterController.isGrounded)
         {
             direction.y = -1f;
@@ -77,6 +83,7 @@ public class PlayerController : MonoBehaviour
             if (Input.GetKeyDown(KeyCode.UpArrow) )
             {
                 direction.y = jumpHeight;
+                
             }
 
           
@@ -101,16 +108,16 @@ public class PlayerController : MonoBehaviour
             if (currentLane == CurrentLane.Mid)
             {
                 // Move to the right lane
-                // characterController.Move(laneToMoveTransform - transform.position);
-                newPos = laneDistance;
-                CameraFollow.instance.xPositionCameraMove = laneDistance / 2;
+              //   characterController.Move(laneToMoveTransform - transform.position);
+                newPos = laneDistance+transform.position.x;
+                CameraFollow.instance.xPositionCameraMove = laneDistance / 2 + PlayerPrefs.GetFloat("CameraXInitialPosition");
                 currentLane = CurrentLane.Right;
             }
 
             else if (currentLane == CurrentLane.Left)
             {
                 // Move to the middle lane
-                //characterController.Move(laneToMoveTransform - transform.position);
+               // characterController.Move(laneToMoveTransform - transform.position);
 
                 newPos = PlayerPrefs.GetFloat("PlayerInitialXPosition");
                 CameraFollow.instance.xPositionCameraMove = PlayerPrefs.GetFloat("PlayerInitialXPosition");
@@ -125,8 +132,8 @@ public class PlayerController : MonoBehaviour
                 // Move to the left lane
 
                 //characterController.Move(laneToMoveTransform - transform.position);
-                newPos = -laneDistance;
-                CameraFollow.instance.xPositionCameraMove = -laneDistance / 2;
+                newPos = -laneDistance+ transform.position.x;
+                CameraFollow.instance.xPositionCameraMove = -laneDistance / 2 + PlayerPrefs.GetFloat("CameraXInitialPosition");
                 currentLane = CurrentLane.Left;
             }
 
@@ -134,7 +141,7 @@ public class PlayerController : MonoBehaviour
             else if (currentLane == CurrentLane.Right)
             {
                 // Move to the middle lane
-                // characterController.Move(laneToMoveTransform - transform.position);
+               //  characterController.Move(laneToMoveTransform - transform.position);
                 newPos = PlayerPrefs.GetFloat("PlayerInitialXPosition");
                 CameraFollow.instance.xPositionCameraMove = PlayerPrefs.GetFloat("PlayerInitialXPosition");
 
@@ -143,9 +150,6 @@ public class PlayerController : MonoBehaviour
         }
 
         
-
-
-
 
         /*
     if(transform.position==laneToMoveTransform)
