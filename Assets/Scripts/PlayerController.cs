@@ -9,7 +9,7 @@ public class PlayerController : MonoBehaviour
     [SerializeField] private CharacterController characterController;
     [SerializeField] private float jumpHeight = 2f;
     [SerializeField] private float smoothTransitionValue;
-
+    [SerializeField] private float rollTime;
     [SerializeField] private List<float> playerSpeedDistance; // After how much distance player speed will increase
     [SerializeField] private List<float> playerSpeedCoinAmount; // After how much coins player speed will increase
     [SerializeField] private List<float> playerSpeedMultiplier; // After how much speed is applied to the player forward movement
@@ -25,8 +25,13 @@ public class PlayerController : MonoBehaviour
     private int currentSpeedMultiplierIndex = 0; // Speed index for Multiplier List
     private CoinCollect coinCollect;
     private float smoothTransition;
-  
     private float newPos;
+    bool rolling = true;
+    private float characterColHeight;
+    private float characterCenterY;
+    private float rollCounter;
+
+    bool swipeLeft, swipeRight, swipeUp, swipeDown;
     private enum CurrentLane
     {
         Left,
@@ -34,10 +39,7 @@ public class PlayerController : MonoBehaviour
         Right
     };
     private CurrentLane currentLane;
-    private void Awake()
-    {
-        
-    }
+ 
     private void Start()
     {
         playerInitialPosition = transform;
@@ -47,6 +49,9 @@ public class PlayerController : MonoBehaviour
         currentLane = CurrentLane.Mid;
        // smoothTransition = playerInitialPosition.position.x; // Initialize smoothTransition
         newPos = playerInitialPosition.position.x;
+
+        characterColHeight = characterController.height;
+        characterCenterY = characterController.center.y;
     }
 
 
@@ -54,6 +59,7 @@ public class PlayerController : MonoBehaviour
     {
 
         GetUserInput();
+        Roll();
     }
 
     private void FixedUpdate()
@@ -75,12 +81,18 @@ public class PlayerController : MonoBehaviour
     }
     private void GetUserInput()
     {
+
+        swipeUp = Input.GetKeyDown(KeyCode.UpArrow);
+        swipeDown = Input.GetKeyDown(KeyCode.DownArrow);
+        swipeLeft = Input.GetKeyDown(KeyCode.LeftArrow);
+        swipeRight = Input.GetKeyDown(KeyCode.RightArrow);
+
         if (characterController.isGrounded)
         {
             direction.y = -1f;
 
             // Jump Input
-            if (Input.GetKeyDown(KeyCode.UpArrow) )
+            if (swipeUp )
             {
                 direction.y = jumpHeight;
                 
@@ -97,13 +109,13 @@ public class PlayerController : MonoBehaviour
         if(!characterController.isGrounded)
         {
             // Downward Input
-            if (Input.GetKeyDown(KeyCode.DownArrow) )
+            if (swipeDown )
             {
                 direction.y = -jumpHeight; // Move downwards
             }
         }
      
-        if (Input.GetKeyDown(KeyCode.RightArrow))
+        if (swipeRight)
         {
             if (currentLane == CurrentLane.Mid)
             {
@@ -125,7 +137,7 @@ public class PlayerController : MonoBehaviour
             }
             
         }
-        else if (Input.GetKeyDown(KeyCode.LeftArrow))
+        else if (swipeLeft)
         {
             if (currentLane == CurrentLane.Mid)
             {
@@ -190,5 +202,24 @@ public class PlayerController : MonoBehaviour
         }
     }
 
-   
+   void Roll()
+    {
+     
+        rollCounter -= Time.deltaTime;
+       if(rollCounter<=0)
+        {
+            rollCounter = rollTime;
+            characterController.height = characterColHeight;
+            characterController.center = new Vector3(0, characterCenterY, 0);
+            rolling = true;
+        }
+        if(swipeDown && rolling)
+        {
+            
+            rollCounter = rollTime;
+            characterController.height = characterColHeight / 2;
+            characterController.center = new Vector3(0, characterCenterY/2 ,0);
+            rolling = false;
+        }
+    }
 }
