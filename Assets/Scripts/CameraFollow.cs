@@ -43,6 +43,8 @@ public class CameraFollow : MonoBehaviour
         }
         else
         {
+            xPositionCameraMoveValue = Mathf.Lerp(transform.position.x, xPositionCameraMove, Time.deltaTime * forSmoothingCameraFollow);
+
             yPositionCameraMoveValue = Mathf.Lerp(transform.position.y, cameraInitialYPosition, Time.deltaTime * 10f);
 
             newPositionZ = new Vector3(xPositionCameraMoveValue, yPositionCameraMoveValue, offset.z + targetToFollow.position.z);
